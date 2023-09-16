@@ -4,6 +4,7 @@
       v-for="(item, index) of [...items.entries, ...items.entries]"
       :key="item.fields.image.uuid"
       v-bind="item.fields.image"
+      @changeStatus="item.fields.image.status = $event"
     />
   </div>
 </template>
@@ -40,6 +41,7 @@ export default {
           },
           fields: {
             image: {
+              status: false,
               url:
                 "https://cloud.modyocdn.com/uploads/f0753a4f-87b2-484d-aeb1-a22c3278cb50/original/bear.jpg",
               tags: [],
