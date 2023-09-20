@@ -4,7 +4,7 @@
       v-for="(item, index) of items"
       :key="`card-${item.uuid}-${index}`"
       v-bind="item"
-      @changeStatus="store.changeStatus(item, $event)"
+      @reveal="store.revealCard(item)"
     />
   </div>
 </template>

@@ -1,6 +1,7 @@
 const KEY = "session";
+import { ISession, ISessionCardObject } from "./session.dto";
+import { ICardItem } from '@/card-item.interface';
 
-import { ISession } from "./session.dto";
 export default {
     init: (): void => {
         const sessionName = localStorage.getItem(KEY);
@@ -8,7 +9,7 @@ export default {
         if (!sessionName) {
             const sign = prompt("Ingresa tu nombre") || "Player";
             const newSession: ISession = {
-                cardsStatuses: {},
+                items: {},
                 errorsCount: 0,
                 name: sign
             }
@@ -26,17 +27,36 @@ export default {
     addError(uuid: string): void {
         const session = this.get();
         session.errorsCount++
-        delete session.cardsStatuses[uuid];
+        console.log(uuid)
+        session.items[uuid].status = "";
         this.set(session)
     },
     addSuccess(uuid: string): void {
         const session = this.get();
-        session.cardsStatuses[uuid] = "success";
+        session.items[uuid].status = "success";
         this.set(session)
     },
     addRevealed(uuid: string): void {
         const session = this.get();
-        session.cardsStatuses[uuid] = "revealed";
+        session.items[uuid].status = "revealed";
         this.set(session)
+    },
+    fillItems(items: Array<ICardItem>): void {
+        const session = this.get();
+        const newItems: Record<string, ISessionCardObject> = {};
+        console.log(items)
+        items.forEach((item, index) => {
+            console.log(item)
+            newItems[item.uuid] = {
+                order: index,
+                status: item.status
+            };
+        });
+
+        console.log({newItems})
+
+        session.items = newItems;
+        this.set(session)
+
     }
 }

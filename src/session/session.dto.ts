@@ -1,7 +1,12 @@
-import { CardStatus } from "@/item.interface";
+import { CardStatus } from "@/card-item.interface";
+
+export type ISessionCardObject = {
+    status: CardStatus;
+    order: number;
+};
 
 export interface ISession {
     name: string;
-    cardsStatuses: Record<string, CardStatus>;
+    items: Record<string, ISessionCardObject>;
     errorsCount: number;
 }
