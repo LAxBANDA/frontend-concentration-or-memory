@@ -1,23 +1,17 @@
 <template>
-  <h1>Aciertos: {{ successCount }} - Errores: {{ errorsCount }}</h1>
+  <h1>Aciertos: {{ successesCount }} - Errores: {{ errorsCount }}</h1>
   <div class="container">
     <CardList />
   </div>
 </template>
 
-<script lang="ts">
-import CardList from "./CardList.vue";
+<script lang="ts" setup>
+import CardList from "@/components/CardList.vue";
+import { useCardStore } from "@/store/card";
+import { storeToRefs } from 'pinia';
 
-export default {
-  components: {
-    CardList,
-  },
-  data: () => ({
-    data: "asda",
-    errorsCount: 0,
-    successCount: 0,
-  }),
-};
+const store = useCardStore();
+const { errorsCount, successesCount } = storeToRefs(store);
 </script>
 
 <style lang="scss">
