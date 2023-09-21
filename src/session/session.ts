@@ -12,7 +12,8 @@ export default {
                 items: {},
                 errorsCount: 0,
                 name: sign
-            }
+            };
+
             localStorage.setItem(KEY, JSON.stringify(newSession));
         } else {
 
@@ -38,25 +39,21 @@ export default {
     },
     addRevealed(uuid: string): void {
         const session = this.get();
+        console.log(session.items[uuid])
         session.items[uuid].status = "revealed";
         this.set(session)
     },
     fillItems(items: Array<ICardItem>): void {
         const session = this.get();
         const newItems: Record<string, ISessionCardObject> = {};
-        console.log(items)
         items.forEach((item, index) => {
-            console.log(item)
             newItems[item.uuid] = {
                 order: index,
                 status: item.status
             };
         });
 
-        console.log({newItems})
-
         session.items = newItems;
         this.set(session)
-
     }
 }

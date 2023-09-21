@@ -3,14 +3,15 @@
     class="card"
     :style="{ backgroundImage }"
     @click="toggleCard"
-    :class="{ 'card--discovered': status, 'card--disabled': status }"
+    :class="{ 'card--discovered': status, 'card--disabled': status || loading }"
     ref="card-ref"
   ></div>
 </template>
 
 <script lang="ts">
 export default {
-  props: ["url", "uuid", "title", "status"],
+  inheritAttrs: false,
+  props: ["url", "uuid", "title", "status", "loading"],
   computed: {
     backgroundImage() {
       return `url(${!this.status ? "/question.png" : this.url})`;
@@ -28,7 +29,7 @@ export default {
   },
   methods: {
     toggleCard() {
-      if (!this.status) {
+      if (!this.status && !this.loading) {
         this.$emit("reveal");
       }
     },

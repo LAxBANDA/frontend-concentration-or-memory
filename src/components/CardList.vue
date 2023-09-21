@@ -4,6 +4,7 @@
       v-for="(item, index) of items"
       :key="`card-${item.uuid}-${index}`"
       v-bind="item"
+      :loading="loading"
       @reveal="store.revealCard(item)"
     />
   </div>
@@ -15,7 +16,7 @@ import { storeToRefs } from "pinia";
 
 import { useCardStore } from "@/store/card";
 const store = useCardStore();
-const { items } = storeToRefs(store);
+const { items, loading } = storeToRefs(store);
 
 store.getCards();
 

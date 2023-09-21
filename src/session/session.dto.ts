@@ -1,6 +1,6 @@
 import { CardStatus } from "@/card-item.interface";
 
-export type ISessionCardObject = {
+export interface ISessionCardObject {
     status: CardStatus;
     order: number;
 };
