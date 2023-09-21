@@ -5,7 +5,7 @@
       :key="`card-${item.uuid}-${index}`"
       v-bind="item"
       :loading="loading"
-      @reveal="store.revealCard(item)"
+      @reveal="store.revealCard(item, index)"
     />
   </div>
 </template>

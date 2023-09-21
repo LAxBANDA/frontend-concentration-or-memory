@@ -1,3 +1,3 @@
 import { ImageDto } from "./image.dto";
-export type CardStatus = '' | 'revealed' | 'success';
-export type ICardItem = ImageDto & { status: CardStatus; order: number };
+import { ISessionCardObject } from "./session/session.dto";
+export type ICardItem = ImageDto & ISessionCardObject;

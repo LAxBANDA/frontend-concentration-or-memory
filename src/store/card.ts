@@ -18,25 +18,38 @@ export const useCardStore = defineStore('card', {
         successesCount: 0,
     }),
     getters: {
-        doubleCount: (state) => 1 * 2,
     },
     actions: {
-        revealCard(itemObj: ICardItem) {
-            const itemRevealed = this.items.find(item => item.status === "revealed");
+        revealCard(itemObj: ICardItem, index: number) {
+            const itemRevealedIndex = this.items.findIndex(item => item.status === "revealed");
+
             itemObj.status = "revealed";
 
-            if (itemRevealed === undefined) {
-                sessionHook.addRevealed(itemObj.uuid);
+            // Si no existe otra carta revelada
+            if (itemRevealedIndex === -1) {
+                // Agregaremos al storage
+                console.log(index)
+                sessionHook.changeStatusByIndex(index, "revealed");
                 return;
             }
 
+            const itemRevealed = this.items.at(itemRevealedIndex);
+
+            if (itemRevealed === undefined) {
+                return;
+            }
+
+            // Existe otra carta revelada
+            // Si son iguales o diferentes
             const countType = itemRevealed.uuid === itemObj.uuid ? "success" : "error";
 
             switch (countType) {
-                case "error": {
-                    this.errorsCount++
+                case "error": { // Si son diferentes
+                    this.errorsCount++ // Sumamos un error
                     this.loading = true;
-                    sessionHook.addError(itemRevealed.uuid);
+                    sessionHook.changeStatusByIndex(itemRevealedIndex, "");
+                    sessionHook.changeStatusByIndex(index, "");
+                    sessionHook.addError();
 
                     setTimeout(() => {
                         this.loading = false;
@@ -45,9 +58,10 @@ export const useCardStore = defineStore('card', {
                     }, 3000);
                     break;
                 }
-                case "success": {
-                    this.successesCount++
-                    sessionHook.addSuccess(itemObj.uuid);
+                case "success": { // Si son iguales
+                    this.successesCount++ // Sumamos un acierto
+                    sessionHook.changeStatusByIndex(itemRevealedIndex, "success");
+                    sessionHook.changeStatusByIndex(index, "success");
                     itemRevealed.status = "success";
                     itemObj.status = "success";
                     break;
@@ -57,32 +71,31 @@ export const useCardStore = defineStore('card', {
         async getCards() {
             this.errorsCount = session.errorsCount;
 
-            const isInitialized = Object.keys(session.items).length > 0;
-
             const initializeNew = (entries: EntrieDto[]): void => {
-                entries.forEach((entrie: EntrieDto, index: number, array: EntrieDto[]) => {
-
-                    const sessionItem: ISessionCardObject = { status: "", order: index };
-
-                    const newItem: ICardItem = {
+                const cardItems: ICardItem[] = [];
+                entries.forEach((entrie, index) => {
+                    const cardItem = {
                         ...entrie.fields.image,
-                        ...sessionItem,
-                    };
+                        status: "",
+                    } as ICardItem;
 
-                    this.items.push({ ...newItem });
-
-                    // esta será la copia
-                    this.items.push({ ...newItem });
+                    cardItems.push(cardItem);
+                    cardItems.push({ ...cardItem });
                 });
 
-                this.items = this.items.sort((a, b) => 0.5 - Math.random());
-                sessionHook.fillItems(this.items);
+                const items = cardItems.sort((a, b) => 0.5 - Math.random());
+                sessionHook.fillItems(items);
+                this.items = items;
             }
 
             const initializeExisting = (entries: EntrieDto[]): void => {
+                session.items.forEach(sessionItem => {
+                    const entrie = entries.find(entrie => entrie.fields.image.uuid == sessionItem.uuid);
 
-                entries.forEach((entrie: EntrieDto, index: number, array: EntrieDto[]) => {
-                    const sessionItem: ISessionCardObject = session.items[entrie.fields.image.uuid];
+                    if (entrie === undefined) {
+                        return;
+                    }
+
                     const newItem: ICardItem = {
                         ...entrie.fields.image,
                         ...sessionItem,
@@ -90,18 +103,12 @@ export const useCardStore = defineStore('card', {
 
                     this.items.push({ ...newItem });
 
-                    const copyItem = structuredClone(newItem);
-
                     if (newItem.status == "success") {
                         this.successesCount++;
-                    } else if (newItem.status == "revealed") {
-                        copyItem.status = "";
                     }
-                    // esta será la copia
-                    this.items.push({ ...copyItem });
                 });
 
-                this.items = this.items.sort((a, b) => session.items[a.uuid].order - session.items[b.uuid].order);
+                this.successesCount /= 2;
             }
 
             try {
@@ -109,7 +116,7 @@ export const useCardStore = defineStore('card', {
                     "https://fed-team.modyo.cloud/api/content/spaces/animals/types/game/entries?per_page=20"
                 );
                 const { entries } = await res.json();
-                isInitialized ? initializeExisting(entries) : initializeNew(entries);
+                sessionHook.isInitialized ? initializeExisting(entries) : initializeNew(entries);
 
             } catch (error) {
                 console.log(error);

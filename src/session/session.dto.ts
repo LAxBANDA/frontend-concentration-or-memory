@@ -1,12 +1,12 @@
-import { CardStatus } from "@/card-item.interface";
+export type CardStatus = '' | 'revealed' | 'success';
 
 export interface ISessionCardObject {
     status: CardStatus;
-    order: number;
+    uuid: string;
 };
 
 export interface ISession {
     name: string;
-    items: Record<string, ISessionCardObject>;
+    items: ISessionCardObject[];
     errorsCount: number;
 }

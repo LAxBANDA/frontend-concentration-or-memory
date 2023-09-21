@@ -1,6 +1,12 @@
 const KEY = "session";
-import { ISession, ISessionCardObject } from "./session.dto";
+import { ISession, ISessionCardObject, CardStatus } from "./session.dto";
 import { ICardItem } from '@/card-item.interface';
+// import { useCardStore } from '../store/card'
+// const cardStore = useCardStore();
+
+// cardStore.$subscribe((mutation, state) => {
+//     console.log({ mutation, state })
+// });
 
 export default {
     init: (): void => {
@@ -9,7 +15,7 @@ export default {
         if (!sessionName) {
             const sign = prompt("Ingresa tu nombre") || "Player";
             const newSession: ISession = {
-                items: {},
+                items: [],
                 errorsCount: 0,
                 name: sign
             };
@@ -25,35 +31,48 @@ export default {
     set(session: ISession): void {
         localStorage.setItem(KEY, JSON.stringify(session));
     },
-    addError(uuid: string): void {
+    changeStatus(uuid: string, status: CardStatus) {
         const session = this.get();
-        session.errorsCount++
-        console.log(uuid)
-        session.items[uuid].status = "";
-        this.set(session)
+        const sessionItem = session.items.find(item => item.uuid == uuid)
+
+        if (sessionItem === undefined) {
+            return;
+        }
+
+        status == "" && session.errorsCount++;
+
+        sessionItem.status = status;
+
+        this.set(session);
     },
-    addSuccess(uuid: string): void {
+    changeStatusByIndex(index: number, status: CardStatus) {
         const session = this.get();
-        session.items[uuid].status = "success";
-        this.set(session)
+        const sessionItem = session.items.at(index);
+
+        if (sessionItem === undefined) {
+            return;
+        }
+
+        sessionItem.status = status;
+
+        this.set(session);
     },
-    addRevealed(uuid: string): void {
+    addError() {
         const session = this.get();
-        console.log(session.items[uuid])
-        session.items[uuid].status = "revealed";
-        this.set(session)
+        session.errorsCount++;
+        this.set(session);
     },
     fillItems(items: Array<ICardItem>): void {
         const session = this.get();
-        const newItems: Record<string, ISessionCardObject> = {};
-        items.forEach((item, index) => {
-            newItems[item.uuid] = {
-                order: index,
-                status: item.status
-            };
-        });
+        const newItems = items.map((item, index) => ({
+            uuid: item.uuid,
+            status: item.status,
+        }));
 
         session.items = newItems;
         this.set(session)
+    },
+    get isInitialized() {
+        return Object.keys(this.get().items).length > 0;
     }
 }
