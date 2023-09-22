@@ -5,7 +5,6 @@ import { defineStore } from 'pinia';
 import { CardStatus } from '@/session/session.dto';
 
 const API_URL = "https://fed-team.modyo.cloud/api/content/spaces/animals/types/game/entries?per_page=20";
-const session = sessionHook.getSession;
 
 interface EntrieDto {
     fields: { image: ImageDto };
@@ -19,6 +18,7 @@ export const useCardStore = defineStore('card', {
         successesCount: 0,
     }),
     getters: {
+        gameEnded: (state) => state.items.every(item => item.status === CardStatus.SUCCESS)
     },
     actions: {
         revealCard(itemObj: ICardItem, index: number): CardStatus {
@@ -67,14 +67,15 @@ export const useCardStore = defineStore('card', {
             };
 
             setTimeout(() => {
-                const gameEnded = this.items.every(item => item.status == CardStatus.SUCCESS);
-                gameEnded && this.resetGame();
+                this.gameEnded && this.resetGame();
             }, 1000);
 
             return nextCardStatus;
         },
         resetGame() {
-            window.alert("Felicidades, has terminado el juego")
+            sessionHook.restart();
+
+            window.alert("Felicidades, has terminado el juego");
 
             this.items = [];
             this.successesCount = 0;
@@ -82,7 +83,7 @@ export const useCardStore = defineStore('card', {
             this.getCards();
         },
         async getCards() {
-            this.errorsCount = session.errorsCount;
+            this.errorsCount = sessionHook.getSession.errorsCount;
             this.loading = true;
 
             const initializeNew = async (entries: EntrieDto[]): Promise<ICardItem[]> => {
@@ -108,7 +109,7 @@ export const useCardStore = defineStore('card', {
             }
 
             const initializeExisting = (entries: EntrieDto[]) => {
-                session.items.forEach(sessionItem => {
+                sessionHook.getSession.items.forEach(sessionItem => {
                     const entrie = entries.find(entrie => entrie.fields.image.uuid == sessionItem.uuid);
 
                     if (entrie === undefined) {
