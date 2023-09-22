@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts" setup>
-import CardList from "@/components/CardList.vue";
+import CardList from "@/components/Card/CardList.vue";
 import { useCardStore } from "@/store/card";
 import { storeToRefs } from 'pinia';
 

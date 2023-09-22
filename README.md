@@ -20,6 +20,7 @@ Iniciar juego:
 ```bash
 npm start
 ```
+Navegar a http://localhost:8080
 
 Compilar juego:
 
@@ -49,7 +50,6 @@ El juego trata de un conjunto de naipes, en el cuál podremos dar vuelta un naip
     "css-loader": "^6.8.1",
     "css-minimizer-webpack-plugin": "^5.0.1",
     "dotenv-webpack": "^8.0.1",
-    "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.5.3",
     "mini-css-extract-plugin": "^2.7.6",
     "node-sass": "^9.0.0",

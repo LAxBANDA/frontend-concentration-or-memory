@@ -1,6 +1,6 @@
 <template>
   <div class="card--list">
-    <Card
+    <CardItem
       v-for="(item, index) of items"
       :key="`card-${item.uuid}-${index}`"
       v-bind="item"
@@ -11,23 +11,22 @@
 </template>
 
 <script lang="ts" setup>
-import Card from "./Card.vue";
 import { storeToRefs } from "pinia";
-
-import { useCardStore } from "@/store/card";
-import { ICardItem } from "@/card-item.interface";
 import { ref } from "vue";
+
+import CardItem from "./CardItem.vue";
+import { useCardStore } from "@/store/card";
+import { ICardItem } from "./card-item.interface";
+
 const store = useCardStore();
 const items = ref(<ICardItem[]>[]);
 const { loading, items: cardItems } = storeToRefs(store);
 
 store.getCards().then((response) => {
   cardItems.value.forEach(async (item, index, array) => {
-    console.log({ item });
-
     const promiseFunction = (resolve: any, reject: any) => setTimeout(() => resolve(true), (index * (1 / array.length) * 100) * 10);
 
-    const res = await new Promise(promiseFunction);
+    await new Promise(promiseFunction);
 
     items.value.push(item);
   });
@@ -43,3 +42,4 @@ store.getCards().then((response) => {
   justify-content: center;
 }
 </style>
+@/components/card-item.interface

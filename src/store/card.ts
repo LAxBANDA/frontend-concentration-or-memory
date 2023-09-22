@@ -1,5 +1,5 @@
 import { ImageDto } from '@/image.dto';
-import { ICardItem } from '@/card-item.interface';
+import { ICardItem } from '@/components/Card/card-item.interface';
 import sessionHook from '@/session/session';
 import { defineStore } from 'pinia';
 import { ISessionCardObject } from '@/session/session.dto';
@@ -28,7 +28,6 @@ export const useCardStore = defineStore('card', {
             // Si no existe otra carta revelada
             if (itemRevealedIndex === -1) {
                 // Agregaremos al storage
-                console.log(index)
                 sessionHook.changeStatusByIndex(index, "revealed");
                 return;
             }
@@ -119,7 +118,6 @@ export const useCardStore = defineStore('card', {
                 sessionHook.isInitialized ? initializeExisting(entries) : initializeNew(entries);
 
             } catch (error) {
-                console.log(error);
             } finally {
             }
         },
