@@ -18,9 +18,8 @@ npm install
 Iniciar juego:
 
 ```bash
-npm start
+npm run start:watch
 ```
-Navegar a http://localhost:8080
 
 Compilar juego:
 

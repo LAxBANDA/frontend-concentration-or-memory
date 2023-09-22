@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --mode development",
+    "start:watch": "webpack-dev-server --mode development --open",
     "build": "webpack --mode production",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
