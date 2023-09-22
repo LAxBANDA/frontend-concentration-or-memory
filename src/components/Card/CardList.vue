@@ -31,4 +31,3 @@ store.getCards();
   justify-content: center;
 }
 </style>
-@/components/card-item.interface
