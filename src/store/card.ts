@@ -2,7 +2,6 @@ import { ImageDto } from '@/image.dto';
 import { ICardItem } from '@/components/Card/card-item.interface';
 import sessionHook from '@/session/session';
 import { defineStore } from 'pinia';
-import { ISessionCardObject } from '@/session/session.dto';
 
 const session = sessionHook.getSession;
 

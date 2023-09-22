@@ -1,12 +1,6 @@
 const KEY = "session";
 import { ISession, CardStatus } from "./session.dto";
 import { ICardItem } from '@/components/Card/card-item.interface';
-// import { useCardStore } from '../store/card'
-// const cardStore = useCardStore();
-
-// cardStore.$subscribe((mutation, state) => {
-//     console.log({ mutation, state })
-// });
 
 export default {
     init: (): void => {
