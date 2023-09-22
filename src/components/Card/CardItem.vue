@@ -3,8 +3,7 @@
     class="card"
     :style="{ backgroundImage }"
     @click="toggleCard"
-    :class="{ 'card--discovered': status, 'card--disabled': !enabledClick }"
-    ref="card-ref"
+    :class="{ 'card--revealed': cardRevealed, 'card--disabled': cardDisabled }"
   ></div>
 </template>
 
@@ -24,11 +23,12 @@ const props = defineProps<{
   loading: boolean;
 }>();
 
-const toggleCard = () => enabledClick.value && emit('reveal');
+const cardRevealed = computed(() => props.status !== CardStatus.DEFAULT);
 
-const backgroundImage = computed(() => `url(${!props.status ? "/question.png" : props.url})`);
+const backgroundImage = computed(() => `url(${!cardRevealed.value ? "/question.png" : props.url})`);
 
-const enabledClick = computed(() => props.status == "" && !props.loading)
+const cardDisabled = computed(() => (cardRevealed.value || props.loading));
+const toggleCard = () => !cardDisabled.value && emit('reveal');
 
 </script>
 
@@ -59,7 +59,7 @@ const enabledClick = computed(() => props.status == "" && !props.loading)
       0px 5px 22px 4px rgba(0, 0, 0, 0.12) !important;
   }
 
-  &.card--discovered {
+  &.card--revealed {
     transform: rotateY(180deg);
     background-image: inherit;
   }

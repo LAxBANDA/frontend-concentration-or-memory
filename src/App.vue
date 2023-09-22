@@ -8,10 +8,31 @@
 <script lang="ts" setup>
 import CardList from "@/components/Card/CardList.vue";
 import { useCardStore } from "@/store/card";
-import { storeToRefs } from 'pinia';
+import { storeToRefs } from "pinia";
+import sessionHook from "@/session/session";
+import { CardStatus } from "./session/session.dto";
 
 const store = useCardStore();
 const { errorsCount, successesCount } = storeToRefs(store);
+
+store.$onAction(
+  ({
+    name, // name of the action
+    args,
+    after, // hook after the action returns or resolves
+  }) => {
+    after((result) => {
+      console.log(name, args, result);
+      if (name == "revealCard" && result != undefined) {
+        if (result === CardStatus.DEFAULT) {
+          sessionHook.addError();
+        } else {
+          sessionHook.changeStatusByIndex(args[1], result);
+        }
+      }
+    });
+  }
+);
 </script>
 
 <style lang="scss">

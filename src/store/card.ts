@@ -2,7 +2,9 @@ import { ImageDto } from '@/image.dto';
 import { ICardItem } from '@/components/Card/card-item.interface';
 import sessionHook from '@/session/session';
 import { defineStore } from 'pinia';
+import { CardStatus } from '@/session/session.dto';
 
+const API_URL = "https://fed-team.modyo.cloud/api/content/spaces/animals/types/game/entries?per_page=20";
 const session = sessionHook.getSession;
 
 interface EntrieDto {
@@ -19,57 +21,52 @@ export const useCardStore = defineStore('card', {
     getters: {
     },
     actions: {
-        revealCard(itemObj: ICardItem, index: number) {
-            const itemRevealedIndex = this.items.findIndex(item => item.status === "revealed");
+        revealCard(itemObj: ICardItem, index: number): CardStatus {
+            // 1. Buscamos si hay otra carta revelada (aparte de la que ya revelamos)
+            const itemRevealedIndex = this.items.findIndex(item => item.status === CardStatus.REVEALED);
 
-            itemObj.status = "revealed";
+            // 2. Cambiamos el estado de la carta
+            itemObj.status = CardStatus.REVEALED;
 
-            // Si no existe otra carta revelada
+            // 3. Si no existe otra carta revelada
             if (itemRevealedIndex === -1) {
-                // Agregaremos al storage
-                sessionHook.changeStatusByIndex(index, "revealed");
-                return;
+                return itemObj.status;
             }
 
-            const itemRevealed = this.items.at(itemRevealedIndex);
+            // 4. Accedemos al objeto de carta mediante el index que obtuvimos anteriormente
+            const itemRevealed = this.items[itemRevealedIndex];
 
-            if (itemRevealed === undefined) {
-                return;
-            }
+            // 5. Comparamos si las dos cartas reveladas son iguales o diferentes y guardamos su resultado
+            const nextCardStatus: CardStatus = itemRevealed.uuid === itemObj.uuid ? CardStatus.SUCCESS : CardStatus.DEFAULT;
 
-            // Existe otra carta revelada
-            // Si son iguales o diferentes
-            const countType = itemRevealed.uuid === itemObj.uuid ? "success" : "error";
-
-            switch (countType) {
-                case "error": { // Si son diferentes
+            switch (nextCardStatus) {
+                case CardStatus.DEFAULT: { // Si son diferentes
                     this.errorsCount++ // Sumamos un error
                     this.loading = true;
-                    sessionHook.changeStatusByIndex(itemRevealedIndex, "");
-                    sessionHook.changeStatusByIndex(index, "");
-                    sessionHook.addError();
+                    sessionHook.changeStatusByIndex(itemRevealedIndex, CardStatus.DEFAULT);
+                    sessionHook.changeStatusByIndex(index, CardStatus.DEFAULT);
 
                     setTimeout(() => {
                         this.loading = false;
-                        itemRevealed.status = "";
-                        itemObj.status = "";
+                        itemRevealed.status = CardStatus.DEFAULT;
+                        itemObj.status = CardStatus.DEFAULT;
                     }, 3000);
                     break;
                 }
-                case "success": { // Si son iguales
+                case CardStatus.SUCCESS: { // Si son iguales
                     this.successesCount++ // Sumamos un acierto
-                    sessionHook.changeStatusByIndex(itemRevealedIndex, "success");
-                    sessionHook.changeStatusByIndex(index, "success");
-                    itemRevealed.status = "success";
-                    itemObj.status = "success";
+                    itemRevealed.status = CardStatus.SUCCESS;
+                    itemObj.status = CardStatus.SUCCESS;
                     break;
                 }
             };
 
             setTimeout(() => {
-                const gameEnded = this.items.every(item => item.status == "success");
+                const gameEnded = this.items.every(item => item.status == CardStatus.SUCCESS);
                 gameEnded && this.resetGame();
-            }, 1000)
+            }, 1000);
+
+            return nextCardStatus;
         },
         resetGame() {
             window.alert("Felicidades, has terminado el juego")
@@ -85,10 +82,7 @@ export const useCardStore = defineStore('card', {
 
             const initializeNew = async (entries: EntrieDto[]): Promise<void> => {
 
-                const items = entries.map(entrie => ({
-                    ...entrie.fields.image,
-                    status: ""
-                }) as ICardItem);
+                const items = entries.map(entrie => <ICardItem>({ ...entrie.fields.image, status: CardStatus.DEFAULT }));
 
                 const copiedItems = structuredClone(items);
                 const cardItems = items.concat(copiedItems).sort((a, b) => 0.5 - Math.random());
@@ -99,7 +93,7 @@ export const useCardStore = defineStore('card', {
                     return new Promise<ICardItem>(
                         (resolve) => {
                             setTimeout(() => {
-                                item.status == "success" && this.successesCount++;
+                                item.status === CardStatus.SUCCESS && this.successesCount++;
                                 this.items.push(item);
                                 resolve(item);
                             }, (index * (1 / array.length) * 100) * 10)
@@ -126,16 +120,14 @@ export const useCardStore = defineStore('card', {
 
                     this.items.push({ ...newItem });
 
-                    newItem.status == "success" && this.successesCount++;
+                    newItem.status === CardStatus.SUCCESS && this.successesCount++;
                 });
 
                 this.successesCount /= 2;
             }
 
             try {
-                const res = await fetch(
-                    "https://fed-team.modyo.cloud/api/content/spaces/animals/types/game/entries?per_page=20"
-                );
+                const res = await fetch(API_URL);
                 const { entries } = await res.json();
                 sessionHook.isInitialized ? initializeExisting(entries) : initializeNew(entries);
 

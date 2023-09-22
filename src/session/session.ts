@@ -25,27 +25,9 @@ export default {
     set(session: ISession): void {
         localStorage.setItem(KEY, JSON.stringify(session));
     },
-    changeStatus(uuid: string, status: CardStatus) {
-        const session = this.getSession;
-        const sessionItem = session.items.find(item => item.uuid == uuid)
-
-        if (sessionItem === undefined) {
-            return;
-        }
-
-        status == "" && session.errorsCount++;
-
-        sessionItem.status = status;
-
-        this.set(session);
-    },
     changeStatusByIndex(index: number, status: CardStatus) {
         const session = this.getSession;
-        const sessionItem = session.items.at(index);
-
-        if (sessionItem === undefined) {
-            return;
-        }
+        const sessionItem = session.items[index];
 
         sessionItem.status = status;
 
@@ -58,19 +40,19 @@ export default {
     },
     fillItems(items: Array<ICardItem>): void {
         const session = this.getSession;
-        const newItems = items.map((item, index) => ({
+        const newItems = items.map(item => ({
             uuid: item.uuid,
             status: item.status,
         }));
 
         session.items = newItems;
-        this.set(session)
+        this.set(session);
     },
     restart() {
         const session = this.getSession;
         session.items = [];
         session.errorsCount = 0;
-        this.set(session)
+        this.set(session);
     },
     get isInitialized() {
         return Object.keys(this.getSession.items).length > 0;

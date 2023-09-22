@@ -1,4 +1,8 @@
-export type CardStatus = '' | 'revealed' | 'success';
+export enum CardStatus {
+    DEFAULT = 'default',
+    REVEALED = 'revealed',
+    SUCCESS = 'success'
+}
 
 export interface ISessionCardObject {
     status: CardStatus;
