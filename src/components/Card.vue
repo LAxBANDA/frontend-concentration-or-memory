@@ -3,43 +3,39 @@
     class="card"
     :style="{ backgroundImage }"
     @click="toggleCard"
-    :class="{ 'card--discovered': status, 'card--disabled': status || loading }"
+    :class="{ 'card--discovered': status, 'card--disabled': !enabledClick }"
     ref="card-ref"
   ></div>
 </template>
 
-<script lang="ts">
-export default {
-  inheritAttrs: false,
-  props: ["url", "uuid", "title", "status", "loading"],
-  computed: {
-    backgroundImage() {
-      return `url(${!this.status ? "/question.png" : this.url})`;
-    },
-  },
-  mounted() {
-    const onLoad = () => {
-      console.log("onload");
-    };
+<script setup lang="ts">
+import { CardStatus } from "@/session/session.dto";
+import { ref, computed } from "vue";
 
-    this.$nextTick(() => {
-      // const a = this.$refs as HTMLElement<HTMLDivElement>;
-      (this.$refs["card-ref"] as HTMLDivElement).addEventListener("onload", onLoad);
-    });
-  },
-  methods: {
-    toggleCard() {
-      if (!this.status && !this.loading) {
-        this.$emit("reveal");
-      }
-    },
-  },
-};
+defineOptions({
+  inheritAttrs: false,
+});
+
+const emit = defineEmits(['reveal'])
+
+const props = defineProps<{
+  url: string;
+  status: CardStatus;
+  loading: boolean;
+}>();
+
+const toggleCard = () => enabledClick.value && emit('reveal');
+
+const backgroundImage = computed(() => `url(${!props.status ? "/question.png" : props.url})`);
+
+const enabledClick = computed(() => props.status == "" && !props.loading)
+
 </script>
 
 <style lang="scss">
-.fade-enter-active, .fade-leave-active {
-  transition: opacity .5s;
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 2.5s;
 }
 .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
   opacity: 0;
@@ -52,7 +48,7 @@ export default {
   background-size: cover;
   background-repeat: round;
   cursor: pointer;
-  transition: transform 1s ease;
+  transition: all 1s ease;
 
   &.card--disabled {
     cursor: not-allowed;
@@ -65,7 +61,7 @@ export default {
 
   &.card--discovered {
     transform: rotateY(180deg);
-    opacity: 1;
+    background-image: inherit;
   }
 }
 </style>
