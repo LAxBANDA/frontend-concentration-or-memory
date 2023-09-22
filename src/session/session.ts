@@ -27,8 +27,12 @@ export default {
     },
     changeStatusByIndex(index: number, status: CardStatus) {
         const session = this.getSession;
-        const sessionItem = session.items[index];
+        const sessionItem = session.items.at(index);
 
+        if(sessionItem === undefined){
+            return;
+        }
+        
         sessionItem.status = status;
 
         this.set(session);
