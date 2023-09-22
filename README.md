@@ -15,6 +15,18 @@ Instalar con npm:
 npm install
 ```
 
+Iniciar juego:
+
+```bash
+npm start
+```
+
+Compilar juego:
+
+```bash
+npm run build
+```
+
 <h2>Introducción</h2>
 
 El juego trata de un conjunto de naipes, en el cuál podremos dar vuelta un naipe, luego dar vuelta otro, si son iguales sumamos un punto, si son diferentes tendrémos que voltear ambas nuevamente y volver a jugar.
