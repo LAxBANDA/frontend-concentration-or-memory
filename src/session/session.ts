@@ -1,5 +1,5 @@
 const KEY = "session";
-import { ISession, ISessionCardObject, CardStatus } from "./session.dto";
+import { ISession, CardStatus } from "./session.dto";
 import { ICardItem } from '@/components/Card/card-item.interface';
 // import { useCardStore } from '../store/card'
 // const cardStore = useCardStore();
@@ -25,14 +25,14 @@ export default {
 
         }
     },
-    get(): ISession {
+    get getSession(): ISession {
         return JSON.parse(localStorage.getItem(KEY) || "");
     },
     set(session: ISession): void {
         localStorage.setItem(KEY, JSON.stringify(session));
     },
     changeStatus(uuid: string, status: CardStatus) {
-        const session = this.get();
+        const session = this.getSession;
         const sessionItem = session.items.find(item => item.uuid == uuid)
 
         if (sessionItem === undefined) {
@@ -46,7 +46,7 @@ export default {
         this.set(session);
     },
     changeStatusByIndex(index: number, status: CardStatus) {
-        const session = this.get();
+        const session = this.getSession;
         const sessionItem = session.items.at(index);
 
         if (sessionItem === undefined) {
@@ -58,12 +58,12 @@ export default {
         this.set(session);
     },
     addError() {
-        const session = this.get();
+        const session = this.getSession;
         session.errorsCount++;
         this.set(session);
     },
     fillItems(items: Array<ICardItem>): void {
-        const session = this.get();
+        const session = this.getSession;
         const newItems = items.map((item, index) => ({
             uuid: item.uuid,
             status: item.status,
@@ -72,7 +72,13 @@ export default {
         session.items = newItems;
         this.set(session)
     },
+    restart() {
+        const session = this.getSession;
+        session.items = [];
+        session.errorsCount = 0;
+        this.set(session)
+    },
     get isInitialized() {
-        return Object.keys(this.get().items).length > 0;
+        return Object.keys(this.getSession.items).length > 0;
     }
 }

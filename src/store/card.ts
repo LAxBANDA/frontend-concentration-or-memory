@@ -4,7 +4,7 @@ import sessionHook from '@/session/session';
 import { defineStore } from 'pinia';
 import { ISessionCardObject } from '@/session/session.dto';
 
-const session = sessionHook.get();
+const session = sessionHook.getSession;
 
 interface EntrieDto {
     fields: { image: ImageDto };
@@ -65,26 +65,51 @@ export const useCardStore = defineStore('card', {
                     itemObj.status = "success";
                     break;
                 }
-            }
+            };
+
+            setTimeout(() => {
+                const gameEnded = this.items.every(item => item.status == "success");
+                gameEnded && this.resetGame();
+            }, 1000)
+        },
+        resetGame() {
+            window.alert("Felicidades, has terminado el juego")
+
+            this.items = [];
+            this.successesCount = 0;
+            this.errorsCount = 0;
+            sessionHook.restart();
+            this.getCards();
         },
         async getCards() {
             this.errorsCount = session.errorsCount;
 
-            const initializeNew = (entries: EntrieDto[]): void => {
-                const cardItems: ICardItem[] = [];
-                entries.forEach((entrie, index) => {
-                    const cardItem = {
-                        ...entrie.fields.image,
-                        status: "",
-                    } as ICardItem;
+            const initializeNew = async (entries: EntrieDto[]): Promise<void> => {
 
-                    cardItems.push(cardItem);
-                    cardItems.push({ ...cardItem });
+                const items = entries.map(entrie => ({
+                    ...entrie.fields.image,
+                    status: ""
+                }) as ICardItem);
+
+                const copiedItems = structuredClone(items);
+                const cardItems = items.concat(copiedItems).sort((a, b) => 0.5 - Math.random());
+                sessionHook.fillItems(cardItems);
+
+                const promises = cardItems.map(async (item, index, array) => {
+
+                    return new Promise<ICardItem>(
+                        (resolve) => {
+                            setTimeout(() => {
+                                item.status == "success" && this.successesCount++;
+                                this.items.push(item);
+                                resolve(item);
+                            }, (index * (1 / array.length) * 100) * 10)
+                        });
                 });
 
-                const items = cardItems.sort((a, b) => 0.5 - Math.random());
-                sessionHook.fillItems(items);
-                this.items = items;
+                await Promise.all(promises);
+
+                this.successesCount /= 2;
             }
 
             const initializeExisting = (entries: EntrieDto[]): void => {
@@ -102,9 +127,7 @@ export const useCardStore = defineStore('card', {
 
                     this.items.push({ ...newItem });
 
-                    if (newItem.status == "success") {
-                        this.successesCount++;
-                    }
+                    newItem.status == "success" && this.successesCount++;
                 });
 
                 this.successesCount /= 2;

@@ -12,25 +12,14 @@
 
 <script lang="ts" setup>
 import { storeToRefs } from "pinia";
-import { ref } from "vue";
 
 import CardItem from "./CardItem.vue";
 import { useCardStore } from "@/store/card";
-import { ICardItem } from "./card-item.interface";
 
 const store = useCardStore();
-const items = ref(<ICardItem[]>[]);
-const { loading, items: cardItems } = storeToRefs(store);
+const { loading, items } = storeToRefs(store);
 
-store.getCards().then((response) => {
-  cardItems.value.forEach(async (item, index, array) => {
-    const promiseFunction = (resolve: any, reject: any) => setTimeout(() => resolve(true), (index * (1 / array.length) * 100) * 10);
-
-    await new Promise(promiseFunction);
-
-    items.value.push(item);
-  });
-});
+store.getCards();
 </script>
 
 <style lang="scss">
