@@ -6,6 +6,7 @@ import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import CssMinimizerPlugin from "css-minimizer-webpack-plugin";
 import TerserPlugin from "terser-webpack-plugin";
 const Dotenv = require("dotenv-webpack");
+const CopyPlugin = require('copy-webpack-plugin');
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -60,7 +61,7 @@ const config: Configuration = {
                     hotReload: false
                 }
             },
-
+            
             {
                 test: /\.tsx?$/,
                 use: [
@@ -96,14 +97,20 @@ const config: Configuration = {
         new Dotenv(),
         new VueLoaderPlugin(),
         environmentVaribles,
+        
         new HtmlWebpackPlugin({
             template: "./src/index.html",
+        }),
+        new CopyPlugin({
+            patterns: [
+                { from: 'public', to: '.' } // copia todo desde /public a /dist
+            ],
         }),
     ].concat(!isProduction ? [] : [new MiniCssExtractPlugin({
         filename: isProduction ? "[name].[hash].css" : "[name].css",
         chunkFilename: isProduction ? "[id].[hash].css" : "[id].css"
     })])
-
+    
 };
 
 export default config;

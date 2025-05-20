@@ -25,7 +25,11 @@ const props = defineProps<{
 
 const cardRevealed = computed(() => props.status !== CardStatus.DEFAULT);
 
-const backgroundImage = computed(() => `url(${!cardRevealed.value ? "/question.png" : props.url})`);
+const basePath = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/');
+
+const backgroundImage = computed(() =>
+  `url(${!cardRevealed.value ? `${basePath}question.png` : props.url})`
+);
 
 const cardDisabled = computed(() => (cardRevealed.value || props.loading));
 const toggleCard = () => !cardDisabled.value && emit('reveal');
